@@ -5,11 +5,13 @@ use StandardRequest\Request;
 class CheckClassNumber extends InterfaceCheckData
 {
 
+    const COLUMN = 'ClassNumber';
+
     protected $legalClass;
 
     public function __construct (Request $Request)
     {
-        if (isset($Request->ClassNumber)) {
+        if (isset($Request->{self::COLUMN})) {
             $this->legalClass = array(
                     1,
                     2,
@@ -20,20 +22,24 @@ class CheckClassNumber extends InterfaceCheckData
                     7,
                     8
             );
-            $this->column_value = $Request->ClassNumber;
+            $this->columnValue = $Request->{self::COLUMN};
         } else {
-            $this->column_value = NULL;
+            $this->columnValue = NULL;
         }
     }
 
     public function startCheck ()
     {
-        if ($this->column_value !== NULL) {
-            if (in_array($this->column_value, $this->legalClass)) {
-                return $this->successor->startCheck();
-            }
+        if ($this->columnValue === NULL) {
+            throw new CheckDataException(
+                    'Column \'' . self::COLUMN . '\' undefined', 
+                    $this->columnValue);
         }
-        return FALSE;
+        if (! in_array($this->columnValue, $this->legalClass)) {
+            throw new CheckDataException(
+                    'Invalid value of \'' . self::COLUMN . '\'', 
+                    $this->columnValue);
+        }
     }
 }
 

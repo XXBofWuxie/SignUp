@@ -5,23 +5,33 @@ use StandardRequest\Request;
 class CheckStdId extends InterfaceCheckData
 {
 
+    const COLUMN = 'StdId';
+
     public function __construct (Request $Request)
     {
-        if (isset($Request->StdId)) {
-            $this->column_value = $Request->StdId;
+        if (isset($Request->{self::COLUMN})) {
+            $this->columnValue = $Request->{self::COLUMN};
         } else {
-            $this->column_value = NULL;
+            $this->columnValue = NULL;
         }
     }
 
     public function startCheck ()
     {
-        if ($this->column_value !== NULL) {
-            if (preg_match('2016\d{8}', $this->column_value)) {
-                return $this->successor->startCheck();
-            }
+        if ($this->columnValue === NULL) {
+            throw new CheckDataException(
+                    array(
+                            'Column \'' . self::COLUMN . '\' undefined',
+                            $this->columnValue
+                    ));
         }
-        return FALSE;
+        if (! preg_match('2016\d{8}', $this->columnValue)) {
+            throw new CheckDataException(
+                    array(
+                            'Invalid value of \'' . self::COLUMN . '\'',
+                            $this->columnValue
+                    ));
+        }
     }
 }
 

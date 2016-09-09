@@ -9,9 +9,15 @@ class CheckBirthday extends InterfaceCheckData
 
     protected $search;
 
+    const COLUMN = 'Birthday';
+
+    const YEAR_MIN = 1993;
+
+    const YEAR_MAX = 2002;
+
     public function __construct (Request $Request)
     {
-        if (isset($Request->Birthday)) {
+        if (isset($Request->{self::COLUMN})) {
             $this->search = array(
                     ',',
                     'January',
@@ -43,25 +49,42 @@ class CheckBirthday extends InterfaceCheckData
                     12
             );
             // origin pattern is "31 August, 2016"
-            $this->column_value = str_replace($this->search, $this->replace, 
-                    $Request->Birthday);
+            $this->columnValue = str_replace($this->search, $this->replace, 
+                    $Request->{self::COLUMN});
             // after handling, the date is "31 8 2016"
-            $this->column_value = explode(' ', $this->column_value);
+            $this->columnValue = explode(' ', $this->columnValue);
             // array('day','month','year')
         } else {
-            $this->column_value = NULL;
+            $this->columnValue = NULL;
         }
     }
 
     public function startCheck ()
     {
-        if ($this->column_value[2] > 1993 && $this->column_value[2] < 2002) {
-            if (checkdate($this->column_value[1], $this->column_value[0], 
-                    $this->column_value[2])) {
-                return $this->successor->startCheck();
-            }
+        if ($this->column_value === NULL) {
+            throw new CheckDataException(
+                    array(
+                            'Column \''.self::COLUMN.'\' undefined',
+                            $this->columnValue
+                    ));
         }
-        return FALSE;
+        if ($this->column_value[2] < self::YEAR_MIN ||
+                 $this->column_value[2] > self::YEAR_MAX) {
+            throw new CheckDataException(
+                    array(
+                            'Invalid value of \''.self::COLUMN.'-Year\'',
+                            $this->column_value
+                    ));
+        }
+        if (! checkdate($this->column_value[1], $this->column_value[0], 
+                $this->column_value[2])) {
+            throw new CheckDataException(
+                    array(
+                            'Invalid date of \''.self::COLUMN.'\'',
+                            $this->column_value
+                    ));
+        }
     }
 }
+
 

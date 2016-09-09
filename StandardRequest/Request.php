@@ -6,7 +6,7 @@ class Request implements InterfaceStandardRequest
 
     protected $post;
 
-    public function __construct (bool $use_adepter)
+    public function __construct (Bool $use_adepter)
     {
         if ($use_adepter) {
             $this->useAdepter();

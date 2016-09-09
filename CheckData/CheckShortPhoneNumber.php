@@ -17,11 +17,12 @@ class CheckShortPhoneNumber extends InterfaceCheckData
     public function startCheck ()
     {
         if ($this->column_value !== NULL) {
-            if (preg_match('/^\d{6}$/', $this->column_value) ||
-                     $this->column_value == '') {
-                return $this->successor->startCheck();
-            }
+
         }
+        if (!preg_match('/^\d{5,6}$/', $this->column_value) ||
+                $this->column_value == '') {
+                    return $this->successor->startCheck();
+                }
         return FALSE;
     }
 }

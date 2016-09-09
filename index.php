@@ -10,10 +10,8 @@ function autoLoad ($class_name)
 
 spl_autoload_register('autoLoad');
 
-use \StandardRequest\Request;
-use \Handler\HandlerSignUp;
-use \Handler\HandlerEnd;
-use Handler\HandlerInquiry;
+use StandardRequest\Request;
+use Factory\HandlerFactory;
 
 class Client
 {
@@ -22,18 +20,10 @@ class Client
 
     public function __construct ()
     {
-        $this->Request = new Request();
-        $handler = array(
-                new HandlerSignUp(),
-                new HandlerInquiry(),
-                // End of the chain and it is used to throw the exception.
-                new HandlerEnd()
-        );
-        // you can add the new handler in this array without any other operation
-        for ($i = 1; $i < count($handler); $i ++) {
-            $handler[$i-1]->setSuccessor($handler[$i]);
-        }
-        $handler[0]->handleRequest($this->Request);
+        $this->Request = new Request(TRUE);
+        $handlerFactory = new HandlerFactory();
+        $handler = $handlerFactory->factoryMethod($this->Request);
+        $handler->handleRequest($this->Request);
     }
 }
 

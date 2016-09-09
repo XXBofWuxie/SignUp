@@ -6,37 +6,47 @@ class DatabaseInsert
 
     protected $sql;
 
-    public function __construct (String $table_name)
+    protected $columnNumber;
+
+    public function __construct ()
     {
-        $value = NULL;
-        $this->sql = "INSERT INTO $table_name ";
+        $this->sql = array(
+                'table_name' => '',
+                'column_name' => '',
+                'value' => ''
+        );
+        $this->columnNumber = 0;
     }
 
-    public function setColumn (Array $insert_column)
+    public function setColumn (Array $column)
     {
-        $this->sql .= '(';
-        foreach ($insert_column as $v) {
-            $this->sql .= "$v,";
+        $this->columnNumber = count($column);
+        $this->sql['column_name'] = '(';
+        foreach ($column as $v) {
+            $this->sql['column_name'] .= "$v,";
         }
-        $this->sql = substr($this->sql, 0, - 1);
-        $this->sql .= ') ';
+        $this->sql['column_name'] = substr($this->sql['column_name'], 0, - 1);
+        $this->sql['column_name'] .= ') ';
         return $this;
     }
 
-    public function setValue ($insert_number)
+    public function setValue (Bool $column_number = FALSE)
     {
-        $this->sql .= 'VALUES (';
-        for ($i = 0; $i < $insert_number; $i ++) {
-            $this->sql .= '?,';
+        if ($column_number != FALSE) {
+            $this->columnNumber = $column_number;
         }
-        $this->sql = substr($this->sql, 0, - 1);
-        $this->sql .= ') ';
+        $this->sql['value'] = 'VALUES (';
+        for ($i = 0; $i < $this->columnNumber; $i ++) {
+            $this->sql['value'] .= '?,';
+        }
+        $this->sql['value'] = substr($this->sql['value'], 0, - 1);
+        $this->sql['value'] .= ') ';
         return $this;
     }
 
     public function startInsert (\PDO $PDO, Array $value)
     {
-        $stmt = $PDO->prepare($this->sql);
+        $stmt = $PDO->prepare(implode($this->sql));
         $i = 1;
         foreach ($value as $Key => $v) {
             $stmt->bindParam($i, $value[$Key]);

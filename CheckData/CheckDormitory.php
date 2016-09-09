@@ -1,29 +1,37 @@
 <?php
 namespace CheckData;
-
 use StandardRequest\Request;
 
 class CheckDormitory extends InterfaceCheckData
 {
 
-    public function __construct(Request $Request)
+    const COLUMN = 'Dorimtory';
+
+    public function __construct (Request $Request)
     {
-        if(isset($Request->Dormitory))
-        {
-            $this->column_value = $Request->Dormitory;
+        if (isset($Request->{self::COLUMN})) {
+            $this->column_value = $Request->{self::COLUMN};
         } else {
             $this->column_value = NULL;
         }
     }
 
-    public function startCheck()
+    public function startCheck ()
     {
-        if ($this->column_value != NULL) {
-            if (preg_match('/^[c|C][4|8]$|^[c|C]12$/', $this->column_value)) {
-                return $this->successor->startCheck();
-            }
+        if ($this->column_value === NULL) {
+            throw new CheckDataException(
+                    array(
+                            'Column \'' . self::COLUMN . '\' undefined',
+                            $this->columnValue
+                    ));
         }
-        return FALSE;
+        if (! preg_match('/^[c|C][2|4|7]$/', $this->column_value)) {
+            throw new CheckDataException(
+                    array(
+                            'Invalid value of \'' . self::COLUMN . '\'',
+                            $this->columnValue
+                    ));
+        }
     }
 }
 

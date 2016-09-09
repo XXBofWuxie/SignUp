@@ -5,21 +5,14 @@ use \StandardRequest\Request as Request;
 
 abstract class InterfaceCheckData
 {
-    //use a const to show the column the class check
-    
-    protected $successor;
-    
-    protected $column_value;
+    //use a const 'COLUMN' to show the column the class check
+    //like 'const COLUMN = Birthday'
+    protected $columnValue;
     
     abstract public function __construct(Request $Request);
     
     abstract public function startCheck();
-    //the entrance of starting check, return a bool value 
+    //The entrance of starting check and it will throw a new Exception when facing error.
     
-    public function setNext(InterfaceCheckData $next)
-    {
-        $this->successor = $next;
-    }
-    //set the next check element
 }
 
