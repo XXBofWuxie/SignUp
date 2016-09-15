@@ -1,7 +1,9 @@
 <?php
 namespace Handler;
 use StandardRequest\Request;
-use Database;
+use CheckDataTpl\CheckDataTplInquiry;
+use Database\DatabaseSelect;
+use Database\StaticPdo;
 
 class HandlerInquiry extends InterfaceHandler
 {
@@ -13,89 +15,47 @@ class HandlerInquiry extends InterfaceHandler
 
     public function handleRequest (Request $Request)
     {
-        if ($Request->getHandler() == $this->handler) {
-            $checkObj = array(
-                    new \CheckData\CheckName($Request),
-                    new \CheckData\CheckDormitory($Request),
-                    new \CheckData\CheckRoom($Request),
-                    new \CheckData\CheckEnd($Request)
-            );
-            for ($i = 1; $i < count($checkObj); $i ++) {
-                $checkObj[$i - 1]->setNext($checkObj[$i]);
-            }
-            if ($checkObj[0]->startCheck()) {
-                $PDO = \Database\StaticPdo::DBConnect();
-                $checkCookie = array(
-                        new \CheckData\CheckCookie($Request),
-                        new \CheckData\CheckEnd($Request)
-                );
-                $checkCookie[0]->setNext($checkCookie[1]);
-                if (! $checkCookie[0]->startCheck()) {
-                    $if_exist = \Database\DatabaseInfoExist::infoExist($PDO, 
-                            'member', 
-                            array(
-                                    'Name' => $Request->Name,
-                                    'Dormitory' => $Request->Dormitory,
-                                    'Room' => $Request->Room
-                            ));
-                    if (! $if_exist) {
-                        //can't find the sign up info
-                        echo json_encode(2);
-                        exit();
-                    }
-                }
-                $DBSelect = new \Database\DatabaseSelect('member', 
-                        array(
-                                'Name',
-                                'Sex',
-                                'Birthday',
-                                'QQNumber',
-                                'PhoneNumber',
-                                'ShortPhoneNumber',
-                                'Dormitory',
-                                'Room',
-                                'ClassNumber',
-                                'FirstChoice',
-                                'SecondChoice',
-                                'AceptSwap',
-                                'Interest',
-                                'SelfConception',
-                                'SectorAwareness',
-                                'Experience'
-                        ));
-                $result = $DBSelect->setWhere(
-                        array(
-                                'Name',
-                                'Dormitory',
-                                'Room'
-                        ))->startSelect($PDO, 
-                        array(
-                                $Request->Name,
-                                $Request->Dormitory,
-                                $Request->Room
-                        ));
-                if (count($result)) {
-                    foreach ($result[0] as $v) {
-                        if (is_string($v)) {
-                            $v = htmlspecialchars($v);
-                        }
-                    }
-                    echo json_encode($result);
-                    exit();
-                } else {
-                    //server error
-                    error_log('Database select info error.');
-                    echo json_encode(5);
-                    exit();
-                }
+        $checkTpl = new CheckDataTplInquiry();
+        $checkTpl->setDebugMode(TRUE);
+        $check_result = $checkTpl->startCheck($Request);
+        if ($check_result != 0) {
+            echo json_encode($check_result);
+            exit();
+        }
+        $staticPDO = new StaticPdo();
+        $PDO = $staticPDO->DBConnect();
+        if ($PDO) {
+            json_encode(6);
+            exit();
+        }
+        $DBSelect = new DatabaseSelect();
+        $result = $DBSelect->setColumnName(array(
+                '*'
+        ))
+            ->setTable('SignUp')
+            ->setWhere(array(
+                'Name',
+                'Dormitory',
+                'Room'
+        ))
+            ->setLimitMax(1)
+            ->startSelect($PDO, 
+                array(
+                        $Request->Name,
+                        $Request->Dormitory,
+                        $Request->Room
+                ));
+        if ($result === FALSE) {
+            echo json_encode(5);
+            exit();
+        } else 
+            if (count($result)) {
+                echo json_encode($result);
+                exit();
             } else {
-                //input data format error
-                echo json_encode(1);
+                echo json_encode(2);
                 exit();
             }
-        } else {
-            $this->successor->handleRequest($Request);
-        }
     }
 }
 

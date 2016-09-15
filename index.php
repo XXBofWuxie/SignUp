@@ -11,6 +11,7 @@ function autoLoad ($class_name)
 spl_autoload_register('autoLoad');
 
 use StandardRequest\Request;
+
 use Factory\HandlerFactory;
 
 class Client
@@ -22,7 +23,7 @@ class Client
     {
         $this->Request = new Request(TRUE);
         $handlerFactory = new HandlerFactory();
-        $handler = $handlerFactory->factoryMethod($this->Request);
+        $handler = $handlerFactory->factoryMethod($this->Request->Handler);
         $handler->handleRequest($this->Request);
     }
 }

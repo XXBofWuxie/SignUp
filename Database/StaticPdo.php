@@ -3,7 +3,11 @@ namespace Database;
 
 class StaticPdo extends InterfaceStaticPdo
 {
-    
+    /**
+     * 
+     * @return mixed
+     * <p>FALSE on error.<br><br>Instance of PDO on success.</p>
+     */
     public static function DBConnect()
     {
         try {
@@ -16,8 +20,7 @@ class StaticPdo extends InterfaceStaticPdo
             return static::$PDO;
         } catch (\PDOException $e) {
             error_log($e->getMessage());
-            echo json_encode(6);
-            exit();
+            return FALSE;
         }
     }
 

@@ -16,7 +16,7 @@ class HandlerFactory implements InterfaceFactory
 
     public function factoryMethod ($info)
     {
-        $handler = new $this->prefix.$info.'.php'();
+        $handler = new $this->prefix.$info();
         return $handler;
     }
 
